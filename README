@@ -1,0 +1,51 @@
+A Chat Client Implemented in C++ for my Socket Programming assignemnt in ECE 156. Partnered with Yink Teo.
+
+Trevor Reid
+Yink Teo
+Oct 6 2009
+ECE 156 – Socket Programming
+To Complile
+gcc -lstdc++ client.cc
+gcc -lstdc++ server.cc
+
+Server Documentation
+At a very high level, our server does the following in order
+1.Initialize server 
+2.Accept loop 
+a.Check for new connections
+b.Check for sent data from existing clients
+3.Shutdown server
+We create a struct for clients. This contains information such as the client’s socket data, username and whether the client is connected to the server. We maintain a list of clients and within our accept loop, we service each client for new data. By using the system-call “select”, we are able to accept new clients or new data by checking the file descriptor set. This removes the need for non-blocking sockets or threads to handle multiple client requests. 
+
+When the client is creating a new connection to the server, the server has to receive a connection request and subsequently a string of 15 or less characters to represent the username. 
+
+After connection has been established, the server can respond to the following three commands 
+
+/g: (g)et list of who is online.
+/t user: (onlinet)alk. Initiate chat with user.
+/q : quit.
+
+When /g is received by a chatlient, the server sends out the entire list of who is online in one packet to the same client.
+When /t user is called, the server checks if the user is in its list of online clients. If it is not or if the client tries to connect to itself, the server sends out “/Error”. Otherwise, the server sends out the IP address of the online user that the client requested.
+/q is a command that the client should send the server so that the server knows the client is quitting and can do some clean up by removing the socket from the file descriptor set and by closing the socket to the client. 
+It should also be noted that the server will not accept connections from usernames that begin with the “/” character. This is to allow for easier communications of errors between the server and client.
+
+Client Documentation
+With the brief server documentation above, it is possible to allow a third party to write a client that can utilize the server. It is however, a lot more difficult for a third party to write a client that can communicate with ours over the server because the third party client has to have a structure and method of operation very similar to ours. We will try to cover the basic structure of our client below.
+
+In our client, we first request the user to input a server to connect to and his desired username. Next, the client sets up and socket with a different port number, binds to it and starts listening. The client then enters the main loop where it loops over the following:
+1.Check the file differentescriptor set for data to be received
+a.Either accept new incoming connectnection (from other clients)
+b.Or receive data (from other clients)
+2.clientsHandles Input
+a.Handles commands
+b.Handles text to send
+
+The commands are
+/g : (g)et list of who is online
+/t user: (t)alk. Initiate chat with user
+/b user: (b)yebye. Close chat with user
+/h : help
+/q : quit
+
+
